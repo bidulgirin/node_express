@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>메인 페이지</h1>
+    {% if list %}
+        {% for writing in list %}
+            <div>{{ writing.title }}</div>
+            <div>{{ writing.contents }}</div>
+            <div>{{ writing.date }}</div><br/>          
+        {% endfor %}
+    {% else %}
+        <p> 작성된 글이 없습니다.</p>
+    {% endif %}
+{% endblock %}
