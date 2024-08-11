@@ -4,6 +4,7 @@ import nunjucks from 'nunjucks';
 import path from 'path';
 import bodyParser from 'body-parser';
 import fs from 'fs';
+import mongoose  from 'mongoose';
 
 const app = express();
 
@@ -23,6 +24,27 @@ nunjucks.configure('views', {
     watch: true, // html 파일이 수정될 경우, 다시 반영 후 렌더링
     express: app
 })
+
+// mongoose connect
+mongoose
+    .connect('mongodb://127.0.0.1:27017')
+    .then( () => { console.log('연결 성공')})
+    .catch( e => console.error(e))
+// mongoose set
+const { Schema } = mongoose;
+
+// 스키마 규칙 작성
+const WritingSchema = new Schema({
+    title : String,
+    contents : String,
+    date : {
+        type : Date,
+        default : Date.now
+    }
+})
+
+// 모델 작성 
+const Writing = mongoose.model('Writing', WritingSchema);
 
 // middleware
 // main page GET
