@@ -11,7 +11,7 @@ const app = express();
 const __dirname = path.resolve();
 
 const filePath = path.join(__dirname + '/data', 'writing.json'); // 지금 경로 기준으로 data 라는 폴더 안에 있는 writing.json 파일을 경로변수에 담습니다.
-console.log("????>>>>", filePath);
+// console.log("????>>>>", filePath);
 // body parser set
 app.use(bodyParser.urlencoded({ extended: false })); // express 기본 모듈 사용
 app.use(bodyParser.json());
@@ -44,7 +44,7 @@ const WritingSchema = new Schema({
 })
 
 // 모델 작성 
-const Writing = mongoose.model('Writing', WritingSchema);
+const Writing = mongoose.model('writings', WritingSchema);
 
 // middleware
 // main page GET
@@ -65,28 +65,44 @@ app.post('/write', async (req, res) => {
     const date = req.body.date;
 
     // db 대신에 json 안에 저장하게끔 하장
-    const fileData = fs.readFileSync(filePath); // filePath 를 담아서 그 fileData를 읽어와서 변수에 담음
-    console.log(fileData);
+    // const fileData = fs.readFileSync(filePath); // filePath 를 담아서 그 fileData를 읽어와서 변수에 담음
+    // console.log(fileData);
 
     // json 읽을려고
-    const fileWrites = JSON.parse(fileData); // 파일을 변환함
-    console.log(fileWrites);
+    // const fileWrites = JSON.parse(fileData); // 파일을 변환함
+    // console.log(fileWrites);
 
-    fileWrites.push(
-        {
-            title : title,
-            contents :  contents,
-            date: date,
-        }
-    );
+    // fileWrites.push(
+    //     {
+    //         title : title,
+    //         contents :  contents,
+    //         date: date,
+    //     }
+    // );
+
 
     // 파일의 데이터를 객체로 배열에 푸쉬하려고함 푸쉬 준비....!
     // data/writing.json 에 값 저장하기
-    fs.writeFileSync(filePath, JSON.stringify(fileWrites)); // json 파일을 다시 버퍼화 시켜서 경로에 있는파일에 작성하게함
+    //fs.writeFileSync(filePath, JSON.stringify(fileWrites)); // json 파일을 다시 버퍼화 시켜서 경로에 있는파일에 작성하게함
 
     // 푸쉬할것임
 
-    res.render('detail', { 'detail': { title: title, contents: contents, date: date } });
+    //mongodb 에 저장하는 방법 
+    const writings = new Writing({
+        title : title,
+        contents : contents
+    })
+
+    // 모든 동작이 끝나면 실행할것을 await 안에 적습니다. 
+    const result = await writings.save()
+        .then( () => { 
+            console.log('몽고디비성공');
+            res.render('detail', { 'detail': { title: title, contents: contents} });
+        })
+        .catch( e => {
+            console.error(e)
+            res.render('write') // 통신에 실패하면 write 페이지 랜더 
+        } )
 });
 
 app.get('/detail', async (req, res) => {
